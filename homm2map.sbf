@@ -1,0 +1,513 @@
+type Map struct {
+    Magic                         uint32
+    Complexity                    uint8
+    _                             uint8
+    Width                         uint8
+    Height                        uint8
+    PlayerPresence                array[6] of uint8
+    PlayerHumanPlayable           array[6] of uint8
+    PlayerComputerPlayable        array[6] of uint8
+    PlayerCount                   uint8
+    HumanOnlyPlayers              uint8
+    NonComputerOnlyPlayers        uint8
+
+    SpecialVictoryConditionsType  VictoryCondition
+    ComputerCanWinViaSVC          uint8
+    AllowNormalVictory            uint8
+    SpecialVictoryConditionsData1 uint16
+    SpecialLossConditionsType     LossCondition
+    SpecialLossConditionsData1    uint16
+
+    StartWithHero                 uint8
+    PlayerRace                    array[6] of Race
+
+    SpecialVictoryConditionsData2 uint16
+    SpecialLossConditionsData2    uint16
+
+    _                             array[8] of uint8 // text
+    _                             uint16
+
+    Name                          array[60] of uint8 // text
+    Description                   array[300] of uint8 // text
+
+    RumorCount                    uint8
+    EventCount                    uint8
+    _                             array[8] of uint8
+
+    Tiles                         array[@Width * @Height] of Tile
+    TileAddonCount                uint32
+    TileAddons                    array[@TileAddonCount] of TileAddon
+    CoodCastles                   array[72] of CoodCastle
+    CoodResourceKingdoms          array[144] of CoodResource
+    ObeliskCount                  uint8
+    RumorObjectIds                array[@RumorCount] of uint16
+    EventObjectIds                array[@EventCount] of uint16
+    ObjectCount                   uint16
+    Objects                       array[@ObjectCount] of Object
+    _                             uint32
+}
+
+type Tile struct {
+    TileIndex     uint16 // tile (ocean, grass, snow, swamp, lava, desert, dirt, wasteland, beach)
+    ObjectName1   uint8  // level 1.0
+    IndexName1    uint8  // index level 1.0 or 0xFF
+    Quantity1     uint8  // count
+    Quantity2     uint8  // count
+    ObjectName2   uint8  // level 2.0
+    IndexName2    uint8  // index level 2.0 or 0xFF
+    Shape         uint8  // shape reflect % 4, 0 none, 1 vertical, 2 horizontal, 3 any
+    GeneralObject uint8  // zero or object
+    IndexAddon    uint16 // zero or index addons_t
+    UniqNumber1   uint32 // level 1.0
+    UniqNumber2   uint32 // level 2.0
+}
+
+type TileAddon struct {
+    IndexAddon    uint16 // zero or next addons_t
+    ObjectNameN1  uint8  // level 1.N
+    IndexNameN1   uint8  // level 1.N or 0xFF
+    QuantityN     uint8  //
+    ObjectNameN2  uint8  // level 2.N
+    IndexNameN2   uint8  // level 1.N or 0xFF
+    UniqNumberN1  uint32 // level 1.N
+    UniqNumberN2  uint32 // level 2.N
+}
+
+type CoodCastle struct {
+    X    uint8
+    Y    uint8
+    Type CoodCastleType
+}
+
+type CoodResource struct {
+    X    uint8
+    Y    uint8
+    Type CoodResourceType
+}
+
+type Object struct {
+    Size uint16
+    Data array[@Size] of uint8
+}
+
+type Castle struct {
+    Color              Color
+    UseCustomBuildings uint8
+    Buildings          Buildings
+    Dwellings          Dwellings
+    MagicTower         uint8
+    UseCustomTroops    uint8
+    MonsterType        array[5] of uint8
+    MonsterCount       array[5] of uint16
+    HasCapitan         uint8
+    UseCustomName      uint8
+    CastleName         array[13] of uint8
+    Type               CoodCastleType // Without 0x80
+    IsCastle           uint8
+    ForbidCastle       uint8
+    _                  array[29] of uint8
+}
+
+type Hero struct {
+    _              uint8
+    CustomTroops   uint8
+    MonsterType    array[5] of uint8 // 0xFF = None
+    MonsterCount   array[5] of uint16
+    CustomPortrate uint8
+    Portrate       uint8
+    Artifacts      array[3] of uint8 // 0xFF = None
+    _              uint8
+    Experience     uint32
+    CustomSkills   uint8
+    SkillTypes     array[8] of uint8
+    SkillLevels    array[8] of uint8
+    Unknown3       uint8
+    CustomName     uint8
+    Name           array[13] of uint8
+    Patrol         uint8
+    CountSquare    uint8 // for patrol
+    _              array[15] of uint8
+}
+
+type Info struct { // Sign or buttle
+    Id   uint8
+    _    array[8] of uint8
+    Text cstring
+}
+
+type EventCoord struct {
+    Id       uint8 // 0x01
+    Wood     uint32
+    Mercury  uint32
+    Ore      uint32
+    Sulfur   uint32
+    Crystal  uint32
+    Gems     uint32
+    Golds    uint32
+    Artifact uint16 // 0xffff - none
+    Computer uint8 // allow events for computer
+    Cancel   uint8 // cancel event after first visit
+    _        array[8] of uint8
+    Blue     uint8
+    Green    uint8
+    Red      uint8
+    Yellow   uint8
+    Orange   uint8
+    Purple   uint8
+    Text     cstring
+}
+
+type EventDay struct {
+    Id         uint8  // 0x00
+    Wood       uint32
+    Mercury    uint32
+    Ore        uint32
+    Sulfur     uint32
+    Crystal    uint32
+    Gems       uint32
+    Golds      uint32
+    Artifact   uint16 // always 0xffff - none
+    Computer   uint16 // allow events for computer
+    First      uint16       // day of first occurent
+    Subsequent uint16 // subsequent occurrences
+    _          array[6] of uint8
+    Zero       uint8  // 6 byte 0x00 and end 0x01
+    Blue       uint8
+    Green      uint8
+    Red        uint8
+    Yellow     uint8
+    Orange     uint8
+    Purple     uint8
+    Text       cstring // message + '/0'
+}
+
+type Rumor struct {
+    Id   uint8
+    _    array[7] of uint8
+    Text cstring
+}
+
+type Riddle struct {
+    Id       uint8  // 0x00
+    Wood     uint32
+    Mercury  uint32
+    Ore      uint32
+    Sulfur   uint32
+    Crystal  uint32
+    Gems     uint32
+    Golds    uint32
+    Artifact uint16 // 0xffff - none
+    Count    uint8  // count answers (1, 8)
+    Answer1  array[13] of uint8
+    Answer2  array[13] of uint8
+    Answer3  array[13] of uint8
+    Answer4  array[13] of uint8
+    Answer5  array[13] of uint8
+    Answer6  array[13] of uint8
+    Answer7  array[13] of uint8
+    Answer8  array[13] of uint8
+    Text     cstring
+}
+
+type Color enum(uint8) {
+    Blue = 0
+    Green = 1
+    Red = 2
+    Yellow = 3
+    Orange = 4
+    Purple = 5
+    Unknown = 0xFF
+}
+
+type Buildings set(uint16) {
+    ThiefGuild = 1 << 1
+    Tavern = 1 << 2
+    Shipyard = 1 << 3
+    Well = 1 << 4
+    Statue = 1 << 6
+    LeftTurret = 1 << 7
+    RightTurret = 1 << 8
+    Marketplace = 1 << 9
+    Farm = 1 << 10 // Garbage He, Crystal Gar, Waterfall, Orchard, Skull Pile
+    Moat = 1 << 11
+    Fortification = 1 << 12 // Coliseum, Rainbow, Dungeon, Library, Storm
+}
+
+type Dwellings set(uint16) {
+    Level1 = 1 << 3
+    Level2 = 1 << 4
+    Level3 = 1 << 5
+    Level4 = 1 << 6
+    Level5 = 1 << 7
+    Level6 = 1 << 8
+    UpgradedLevel2 = 1 << 9
+    UpgradedLevel3 = 1 << 10
+    UpgradedLevel4 = 1 << 11
+    UpgradedLevel5 = 1 << 12
+    UpgradedLevel6 = 1 << 13
+}
+
+type ObjectType enum(uint8) {
+    None = 0x00
+    AlchemyLab = 0x01
+    Skeleton = 0x04
+    DaemonCave = 0x05
+    FaerieRing = 0x07
+    Gazebo = 0x0A
+    Graveyard = 0x0C
+    ArcherHouse = 0x0D
+    DwarfCott = 0x0F
+
+    PeasantHut = 0x10
+    DragonCity = 0x14
+    Lighthouse = 0x15
+    WaterWheel = 0x16
+    Mines = 0x17
+    Obelisk = 0x19
+    Oasis = 0x1A
+    Coast = 0x1C
+    Sawmill = 0x1D
+    Oracle = 0x1E
+
+    Shipwreck = 0x20
+    DesertTent = 0x22
+    Castle = 0x23
+    StoneLights = 0x24
+    WagonCamp = 0x25
+    Windmill = 0x28
+
+    RandomTown = 0x30
+    RandomCastle = 0x31
+    Shrub2 = 0x38
+    NothingSpecial = 0x39
+    WatchTower = 0x3A
+    TreeHouse = 0x3B
+    TreeCity = 0x3C
+    Ruins = 0x3D
+    Fort = 0x3E
+    TradingPost = 0x3F
+
+    AbandonedMine = 0x40
+    TreeKnowledge = 0x44
+    DoctorHut = 0x45
+    Temple = 0x46
+    HillFort = 0x47
+    HalflingHole = 0x48
+    MercenaryCamp = 0x49
+    Pyramid = 0x4C
+    Citydead = 0x4D
+    Excavation = 0x4E
+    Sphinx = 0x4F
+
+    TarPit = 0x51
+    ArtesianSpring = 0x52
+    TrollBridge = 0x53
+    WateringHole = 0x54
+    WitchShut = 0x55
+    Xanadu = 0x56
+    Cave = 0x57
+    MagellanMaps = 0x59
+    DerelictShip = 0x5B
+    MagicWell = 0x5E
+
+    ObservationTower = 0x60
+    FreemanFoundry = 0x61
+    Trees = 0x63
+    Mounts = 0x64
+    Volcano = 0x65
+    Flowers = 0x66
+    Stones = 0x67
+    WaterLake = 0x68
+    Mandrake = 0x69
+    DeadTree = 0x6A
+    Stump = 0x6B
+    Crater = 0x6C
+    Cactus = 0x6D
+    Mound = 0x6E
+    Dune = 0x6F
+
+    LavaPool = 0x70
+    Shrub = 0x71
+    Arena = 0x72
+    BarrowMounds = 0x73
+    Mermaid = 0x74
+    Sirens = 0x75
+    HutMagi = 0x76
+    EyeMagi = 0x77
+    TravellerTent = 0x78
+    Jail = 0x7B
+    FireAltar = 0x7C
+    AirAltar = 0x7D
+    EarthAltar = 0x7E
+    WaterAltar = 0x7F
+
+    WaterChest = 0x80
+    AlchemyLab = 0x81
+    Sign = 0x82
+    Buoy = 0x83
+    Skeleton = 0x84
+    DaemonCave = 0x85
+    TreasureChest = 0x86
+    FaerieRing = 0x87
+    Campfire = 0x88
+    Fountain = 0x89
+    Gazebo = 0x8A
+    AncientLamp = 0x8B
+    Graveyard = 0x8C
+    ArcherHouse = 0x8D
+    GoblinHut = 0x8E
+    DwarfCott = 0x8F
+
+    PeasantHut = 0x90
+    Event = 0x93
+    DragonCity = 0x94
+    Lighthouse = 0x95
+    Waterwheel = 0x96
+    Mines = 0x97
+    Monster = 0x98
+    Obelisk = 0x99
+    Oasis = 0x9A
+    Resource = 0x9B
+    Sawmill = 0x9D
+    Oracle = 0x9E
+    Shrine1 = 0x9F
+
+    Shipwreck = 0xA0
+    DesertTent = 0xA2
+    Castle = 0xA3
+    StoneLights = 0xA4
+    Wagoncamp = 0xA5
+    Whirlpool = 0xA7
+    Windmill = 0xA8
+    Artifact = 0xA9
+    Boat = 0xAB
+    RandomUltimateArtifact = 0xAC
+    RandomArtifact = 0xAD
+    RandomResource = 0xAE
+    RandomMonster = 0xAF
+
+    RandomTown = 0xB0
+    RandomCastle = 0xB1
+    RandomMonster1 = 0xB3
+    RandomMonster2 = 0xB4
+    RandomMonster3 = 0xB5
+    RandomMonster4 = 0xB6
+    Heroes = 0xB7
+    WatchTower = 0xBA
+    TreeHouse = 0xBB
+    TreeCity = 0xBC
+    Ruins = 0xBD
+    Fort = 0xBE
+    TradingPost = 0xBF
+
+    AbandonedMine = 0xC0
+    ThatchedHut = 0xC1
+    StandingStones = 0xC2
+    Idol = 0xC3
+    TreeKnowledge = 0xC4
+    Doctorhut = 0xC5
+    Temple = 0xC6
+    HillFort = 0xC7
+    HalflingHole = 0xC8
+    MercenaryCamp = 0xC9
+    Shrine2 = 0xCA
+    Shrine3 = 0xCB
+    Pyramid = 0xCC
+    Citydead = 0xCD
+    Excavation = 0xCE
+    Sphinx = 0xCF
+
+    Wagon = 0xD0
+    ArtesianSpring = 0xD2
+    TrollBridge = 0xD3
+    WateringHole = 0xD4
+    WitchShut = 0xD5
+    Xanadu = 0xD6
+    Cave = 0xD7
+    Leanto = 0xD8
+    MagellanMaps = 0xD9
+    Flotsam = 0xDA
+    DerelictShip = 0xDB
+    ShipwreckSurviror = 0xDC
+    Bottle = 0xDD
+    MagicWell = 0xDE
+    MagicGarden = 0xDF
+
+    ObservationTower = 0xE0
+    FreemanFoundry = 0xE1
+    Reefs = 0xE9
+    AlchemyTower = 0xEA
+    Stables = 0xEB
+    Mermaid = 0xEC
+    Sirens = 0xED
+    Hutmagi = 0xEE
+    Eyemagi = 0xEF
+
+    AlchemyTower = 0xF0
+    Stables = 0xF1
+    Arena = 0xF2
+    BarrowMounds = 0xF3
+    RandomArtifact1 = 0xF4
+    RandomArtifact2 = 0xF5
+    RandomArtifact3 = 0xF6
+    Barrier = 0xF7
+    TravellerTent = 0xF8
+    Jail = 0xFB
+    FireAltar = 0xFC
+    AirAltar = 0xFD
+    EarthAltar = 0xFE
+    WaterAltar = 0xFF
+}
+
+type CoodCastleType set(uint8) {
+    Knight = 0
+    Barbarian = 1
+    Sorceress = 2
+    Warlock = 3
+    Wizard = 4
+    Necromancer = 5
+    Random = 6
+
+    Castle = 0x80
+}
+
+type CoodResourceType enum(uint8) {
+    WoodMine = 0
+    MercuryMin = 1
+    OreMine = 2
+    SulfurMine = 3
+    CrystalMine = 4
+    GemsMine = 5
+    GoldMine = 6
+    LightHouse = 0x64
+    DragonCity = 0x65
+    AbandonedMine = 0x67
+}
+
+type VictoryCondition enum(uint8) {
+    All = 0 // ?
+    Town = 1
+    Hero = 2
+    Artifact = 3
+    Side = 4
+    Gold = 5
+}
+
+type LossCondition enum(uint8) {
+    All = 0 // ?
+    Town = 1
+    Hero = 2
+    Time = 3
+}
+
+type Race enum(uint8) {
+    Knight = 0
+    Barbarian = 1
+    Sorceress = 2
+    Warlock = 3
+    Wizard = 4
+    Necromancer = 5
+    Multiple = 6
+    Random = 7
+    None = 255
+}
