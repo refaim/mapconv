@@ -135,48 +135,35 @@ type Info struct { // Sign or buttle
     Text cstring
 }
 
-type EventCoord struct {
-    Id       uint8 // 0x01
+type Reward struct {
     Wood     uint32
     Mercury  uint32
     Ore      uint32
     Sulfur   uint32
     Crystal  uint32
     Gems     uint32
-    Golds    uint32
+    Gold     uint32
     Artifact uint16 // 0xffff - none
+}
+
+type EventCoord struct {
+    Id       uint8 // 0x01
+    Reward   Reward
     Computer uint8 // allow events for computer
     Cancel   uint8 // cancel event after first visit
     _        array[8] of uint8
-    Blue     uint8
-    Green    uint8
-    Red      uint8
-    Yellow   uint8
-    Orange   uint8
-    Purple   uint8
+    Players  array[6] of uint8
     Text     cstring
 }
 
 type EventDay struct {
     Id         uint8  // 0x00
-    Wood       uint32
-    Mercury    uint32
-    Ore        uint32
-    Sulfur     uint32
-    Crystal    uint32
-    Gems       uint32
-    Gold       uint32
-    Artifact   uint16 // always 0xffff - none
+    Reward     Reward
     Computer   uint16 // allow events for computer
     First      uint16       // day of first occurent
     Subsequent uint16 // subsequent occurrences
     _          array[6] of uint8
-    Blue       uint8
-    Green      uint8
-    Red        uint8
-    Yellow     uint8
-    Orange     uint8
-    Purple     uint8
+    Players    array[6] of uint8
     Text       cstring // message + '/0'
 }
 
@@ -188,23 +175,9 @@ type Rumor struct {
 
 type Riddle struct {
     Id       uint8  // 0x00
-    Wood     uint32
-    Mercury  uint32
-    Ore      uint32
-    Sulfur   uint32
-    Crystal  uint32
-    Gems     uint32
-    Golds    uint32
-    Artifact uint16 // 0xffff - none
+    Reward   Reward
     Count    uint8  // count answers (1, 8)
-    Answer1  array[13] of uint8
-    Answer2  array[13] of uint8
-    Answer3  array[13] of uint8
-    Answer4  array[13] of uint8
-    Answer5  array[13] of uint8
-    Answer6  array[13] of uint8
-    Answer7  array[13] of uint8
-    Answer8  array[13] of uint8
+    Answers  array[8] of array[13] of uint8
     Text     cstring
 }
 
