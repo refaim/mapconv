@@ -165,13 +165,12 @@ type EventDay struct {
     Sulfur     uint32
     Crystal    uint32
     Gems       uint32
-    Golds      uint32
+    Gold       uint32
     Artifact   uint16 // always 0xffff - none
     Computer   uint16 // allow events for computer
     First      uint16       // day of first occurent
     Subsequent uint16 // subsequent occurrences
     _          array[6] of uint8
-    Zero       uint8  // 6 byte 0x00 and end 0x01
     Blue       uint8
     Green      uint8
     Red        uint8
