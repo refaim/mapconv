@@ -3,7 +3,7 @@
 run_test: build_test
 	./test
 
-build_test:
+build_test: generate_homm2
 	go build
 
 generate_homm2: homm2map.sbf
