@@ -121,7 +121,7 @@ type Hero struct {
     CustomSkills   uint8
     SkillTypes     array[8] of uint8
     SkillLevels    array[8] of uint8
-    Unknown3       uint8
+    _              uint8
     CustomName     uint8
     Name           array[13] of uint8
     Patrol         uint8
