@@ -589,6 +589,8 @@ def get_parent_type(type):
 def add_indent(content, level):
     return '\n'.join(["\t" * level + line for line in content.split("\n")])
 
+class GenerationImpossible(Exception): pass
+
 def convert_to_go(types, package_name):
     def out(format, *args):
         result.append(format.format(*args).replace('\t', indent))
@@ -603,6 +605,8 @@ def convert_to_go(types, package_name):
             return get_go_type(type.base_type)
         elif isinstance(type, String):
             return "string"
+        elif isinstance(type, FilteredType):
+            return get_go_type(type.parent_type)
         elif isinstance(type, TypeUnion):
             return "interface{}"
         elif type in type_names:
@@ -619,7 +623,10 @@ def convert_to_go(types, package_name):
 
     def format_go_expr(expr, context):
         def resolve_ref(r):
-            return "int({0}.{1})".format(context[r.level], type_names[r.ref])
+            try:
+                return "int({0}.{1})".format(context[r.level], type_names[r.ref])
+            except IndexError:
+                raise GenerationImpossible()
         if isinstance(expr, Int):
             return unicode(expr.value)
         elif isinstance(expr, BinaryOp):
@@ -627,7 +634,7 @@ def convert_to_go(types, package_name):
         elif isinstance(expr, FieldRef):
             return resolve_ref(expr)
         elif isinstance(expr, EnumValue):
-            return "{0}::{1}".format(type_names[expr.enum_ref], expr.name)
+            return "int({0}{1})".format(type_names[expr.enum_ref], expr.name)
         raise NotImplementedError(expr.__class__.__name__)
 
     type_names = dict((type, name) for name, type in types.iteritems())
@@ -652,11 +659,12 @@ def convert_to_go(types, package_name):
     for name, type in types.iteritems():
         if isinstance(type, Struct):
             out('type {0} struct {{\n', name, type_names[type])
-            max_len = max(len(field.name) for field in type.fields)
-            for field in type.fields:
-                type_names[field] = field.name
-                type_expr = get_go_type(field.type_expr)
-                out('\t{0} {1}\n', field.name.ljust(max_len), type_expr)
+            if type.fields:
+                max_len = max(len(field.name) for field in type.fields)
+                for field in type.fields:
+                    type_names[field] = field.name
+                    type_expr = get_go_type(field.type_expr)
+                    out('\t{0} {1}\n', field.name.ljust(max_len), type_expr)
             out('}}\n\n')
 
     for name, type in types.iteritems():
@@ -697,11 +705,8 @@ def convert_to_go(types, package_name):
     def generate_reader(type, path, context, depth):
         indent = '\t' * depth
         if isinstance(type, Struct):
-            if depth > 1:
-                out('{}{}.Serialize(b)\n', indent, path)
-            else:
-                new_context = context + [path]
-                generate_blocks(type.blocks, path, new_context, depth)
+            new_context = context + [path]
+            generate_blocks(type.blocks, path, new_context, depth)
         elif isinstance(type, IntegralType):
             assert type.little_endian == True
             out('{}b.UInt{}({})\n'.format(indent, type.byte_size * 8, path))
@@ -712,6 +717,8 @@ def convert_to_go(types, package_name):
             generate_reader(type.base_type, path, context, depth)
         elif isinstance(type, Enum):
             generate_reader(type.base_type, '(*{})({})'.format(get_go_type(type.base_type), path), context, depth)
+        elif isinstance(type, FilteredType):
+            generate_reader(type.parent_type, path, context, depth)
         elif isinstance(type, TypeUnion):
             out('{}switch {} {{\n', indent, format_go_expr(type.expr, context))
             for case in type.cases:
@@ -737,16 +744,16 @@ def convert_to_go(types, package_name):
             v = 'v{}'.format(counter[0])
             dynamic = not isinstance(type.length, Int)
 
-            new_path = '(&(*{})[{}])'.format(path, i)
+            new_path = '({}(*{})[{}])'.format('' if is_ptr_array(type) else '&', path, i)
 
             out('{}{} := {}\n'.format(indent, size, format_go_expr(type.length, context)))
 
             if dynamic:
-                out('{}if b.IsReader() {{', indent)
+                out('{}if b.IsReader() {{\n', indent)
                 out('\t{}*{} = make({}, {})\n', indent, path, get_go_type(type), size)
                 if not isinstance(type.base_type, IntegralType):
                     out('\t{0}for {1} := (0); {1} < {2}; {1}++ {{\n', indent, i, size)
-                    out('\t\t{0}*{1} = &{2}{{}}\n', indent, new_path, get_go_type(type.base_type))
+                    out('\t\t{0}{3}{1} = &{2}{{}}\n', indent, new_path, get_go_type(type.base_type), '' if is_ptr_array(type) else '*')
                     out('\t{}}}\n', indent)
                 out('{}}}\n', indent)
 
@@ -760,9 +767,14 @@ def convert_to_go(types, package_name):
 
     for name, type in types.iteritems():
         if isinstance(type, Struct):
-            out('func (s *{}) Serialize(b Serializer) {{\n', name)
-            generate_reader(type, "s", [], 1)
-            out('}}\n\n')
+            old_len = len(result)
+            try:
+                out('func (s *{}) Serialize(b Serializer) {{\n', name)
+                generate_reader(type, "s", [], 1)
+                out('}}\n\n')
+            except GenerationImpossible:
+                print get_go_type(type)
+                result = result[:old_len]
 
     return ''.join(result)
 
