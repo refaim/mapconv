@@ -603,6 +603,8 @@ def convert_to_go(types, package_name):
             return get_go_type(type.base_type)
         elif isinstance(type, String):
             return "string"
+        elif isinstance(type, TypeUnion):
+            return "interface{}"
         elif type in type_names:
             return type_names[type]
         elif isinstance(type, SubType):
@@ -710,6 +712,24 @@ def convert_to_go(types, package_name):
             generate_reader(type.base_type, path, context, depth)
         elif isinstance(type, Enum):
             generate_reader(type.base_type, '(*{})({})'.format(get_go_type(type.base_type), path), context, depth)
+        elif isinstance(type, TypeUnion):
+            out('{}switch {} {{\n', indent, format_go_expr(type.expr, context))
+            for case in type.cases:
+                counter[0] += 1
+                if case.expr is None:
+                    out('{}default:\n', indent)
+                else:
+                    out('{}case {}:\n', indent, format_go_expr(case.expr, context))
+                var = 'v{}'.format(counter[0])
+                out('\t{}if b.IsReader() {{\n', indent)
+                out('\t\t{}var {} {}\n', indent, var, get_go_type(case.type))
+                generate_reader(case.type, var, context, depth + 2)
+                out('\t\t{}*{} = &{}\n', indent, path, var)
+                out('\t{}}} else {{\n', indent)
+                out('\t\t{}{} := (*{}).(*{})\n', indent, var, path, get_go_type(case.type))
+                generate_reader(case.type, var, context, depth + 2)
+                out('\t{}}}\n', indent)
+            out('{}}}\n', indent)
         elif isinstance(type, Array):
             counter[0] += 1
             size = 'size{}'.format(counter[0])
