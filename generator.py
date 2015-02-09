@@ -678,6 +678,20 @@ def convert_to_go(types, package_name):
             out(')\n\n')
 
     counter = [0]
+
+    def generate_blocks(blocks, path, context, depth):
+        indent = '\t' * depth
+        for block in blocks:
+            if isinstance(block, Field):
+                field_path = '(&({}.{}))'.format(path, block.name)
+                generate_reader(block.type_expr, field_path, context, depth)
+            elif isinstance(block, IfStmt):
+                out('{}if {} {{\n', indent, format_go_expr(block.cond, context))
+                generate_blocks(block.blocks, path, context, depth + 1)
+                out('{}}}\n', indent)
+            else:
+                raise Exception("Unsupported block type {0}".format(block.__class__.__name__))
+
     def generate_reader(type, path, context, depth):
         indent = '\t' * depth
         if isinstance(type, Struct):
@@ -685,9 +699,7 @@ def convert_to_go(types, package_name):
                 out('{}{}.Serialize(b)\n', indent, path)
             else:
                 new_context = context + [path]
-                for field in type.fields:
-                    field_path = '(&({}.{}))'.format(path, field.name)
-                    generate_reader(field.type_expr, field_path, new_context, depth)
+                generate_blocks(type.blocks, path, new_context, depth)
         elif isinstance(type, IntegralType):
             assert type.little_endian == True
             out('{}b.UInt{}({})\n'.format(indent, type.byte_size * 8, path))
