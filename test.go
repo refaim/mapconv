@@ -5,9 +5,22 @@ import (
 	"./serializers"
 	"encoding/hex"
 	"fmt"
+	"golang.org/x/text/encoding/charmap"
 	"io/ioutil"
 	"log"
 )
+
+func decode(in string) string {
+	enc := charmap.Windows1251
+	d := enc.NewDecoder()
+
+	dst := make([]byte, 4*len(in))
+	ndst, _, err := d.Transform(dst, []byte(in), true)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return string(dst[:ndst])
+}
 
 func main() {
 	data, err := ioutil.ReadFile("maps/Map_0001.MP2")
@@ -49,12 +62,12 @@ func main() {
 
 	fmt.Println(m.RumorCount)
 	for _, rumor := range m.Rumors() {
-		fmt.Printf("%#v\n", rumor)
+		fmt.Printf("Rumor\n%#v\n\n", decode(rumor.Text))
 	}
 
 	for _, event := range m.Events() {
-		fmt.Printf("%#v\n", event)
+		fmt.Printf("Event\n%#v\n\n", decode(event.Text))
 	}
 
-	fmt.Printf("Name = %s, Description = %s\n", m.NameStr(), m.DescriptionStr())
+	fmt.Printf("Name = %s\nDescription = %s\n", decode(m.NameStr()), decode(m.DescriptionStr()))
 }
