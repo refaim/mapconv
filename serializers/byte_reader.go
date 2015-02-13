@@ -1,5 +1,9 @@
 package serializers
 
+import (
+	"unsafe"
+)
+
 type ByteReader struct {
 	data   []byte
 	pos    int
@@ -29,6 +33,18 @@ func (b *ByteReader) UInt32(dst *uint32) {
 	b.checkAvailLength(4)
 	*dst = uint32(b.data[b.pos]) + uint32(b.data[b.pos+1])*256 + uint32(b.data[b.pos+2])*256*256 + uint32(b.data[b.pos+3])*256*256*256
 	b.pos += 4
+}
+
+func (b *ByteReader) Int8(dst *int8) {
+	b.UInt8((*uint8)(unsafe.Pointer(dst)))
+}
+
+func (b *ByteReader) Int16(dst *int16) {
+	b.UInt16((*uint16)(unsafe.Pointer(dst)))
+}
+
+func (b *ByteReader) Int32(dst *int32) {
+	b.UInt32((*uint32)(unsafe.Pointer(dst)))
 }
 
 func (b *ByteReader) CString(dst *string) {

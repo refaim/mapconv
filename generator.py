@@ -26,6 +26,7 @@ class IntegralType(Type):
         self.little_endian = True
         self.min_size = size
         self.max_size = size
+        self.signed = signed
         if signed:
             self.min_value = 2 ** (size * 8 - 1) + 1
             self.max_value = 2 ** (size * 8 - 1) - 1
@@ -407,6 +408,9 @@ def add_default_types(types):
     types['uint8'] = IntegralType(1, signed=False)
     types['uint16'] = IntegralType(2, signed=False)
     types['uint32'] = IntegralType(4, signed=False)
+    types['int8'] = IntegralType(1, signed=True)
+    types['int16'] = IntegralType(2, signed=True)
+    types['int32'] = IntegralType(4, signed=True)
     types['cstring'] = String()
 
 
@@ -646,6 +650,9 @@ def convert_to_go(types, package_name):
     out('\tUInt8(*uint8)\n')
     out('\tUInt16(*uint16)\n')
     out('\tUInt32(*uint32)\n')
+    out('\tInt8(*int8)\n')
+    out('\tInt16(*int16)\n')
+    out('\tInt32(*int32)\n')
     out('\tCString(*string)\n')
     out('\tIsReader() bool\n')
     out('}}\n\n')
@@ -709,7 +716,7 @@ def convert_to_go(types, package_name):
             generate_blocks(type.blocks, path, new_context, depth)
         elif isinstance(type, IntegralType):
             assert type.little_endian == True
-            out('{}b.UInt{}({})\n'.format(indent, type.byte_size * 8, path))
+            out('{}b.{}Int{}({})\n'.format(indent, '' if type.signed else 'U', type.byte_size * 8, path))
         elif isinstance(type, String):
             # TODO min max length
             out('{}b.CString({})\n'.format(indent, path))

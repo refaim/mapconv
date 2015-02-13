@@ -5,17 +5,15 @@ import (
 	"./serializers"
 	"encoding/hex"
 	"fmt"
+	"github.com/kr/pretty"
 	"golang.org/x/text/encoding/charmap"
 	"io/ioutil"
 	"log"
 )
 
 func decode(in string) string {
-	enc := charmap.Windows1251
-	d := enc.NewDecoder()
-
 	dst := make([]byte, 4*len(in))
-	ndst, _, err := d.Transform(dst, []byte(in), true)
+	ndst, _, err := charmap.Windows1251.NewDecoder().Transform(dst, []byte(in), true)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -60,13 +58,16 @@ func main() {
 		}
 	}
 
-	fmt.Println(m.RumorCount)
 	for _, rumor := range m.Rumors() {
 		fmt.Printf("Rumor\n%#v\n\n", decode(rumor.Text))
 	}
 
 	for _, event := range m.Events() {
 		fmt.Printf("Event\n%#v\n\n", decode(event.Text))
+	}
+
+	for _, obj := range m.MapObjects() {
+		fmt.Printf("%# v\n\n", pretty.Formatter(obj))
 	}
 
 	fmt.Printf("Name = %s\nDescription = %s\n", decode(m.NameStr()), decode(m.DescriptionStr()))

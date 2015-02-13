@@ -136,13 +136,13 @@ type Info struct { // Sign or buttle
 }
 
 type Reward struct {
-    Wood     uint32
-    Mercury  uint32
-    Ore      uint32
-    Sulfur   uint32
-    Crystal  uint32
-    Gems     uint32
-    Gold     uint32
+    Wood     int32
+    Mercury  int32
+    Ore      int32
+    Sulfur   int32
+    Crystal  int32
+    Gems     int32
+    Gold     int32
     Artifact uint16 // 0xffff - none
 }
 
@@ -151,7 +151,7 @@ type EventCoord struct {
     Reward   Reward
     Computer uint8 // allow events for computer
     Cancel   uint8 // cancel event after first visit
-    _        array[8] of uint8
+    _        array[10] of uint8
     Players  array[6] of uint8
     Text     cstring
 }
@@ -220,70 +220,70 @@ type Dwellings set(uint16) {
 }
 
 type ObjectType enum(uint8) {
-    None = 0x00
-    AlchemyLab = 0x01
-    Skeleton = 0x04
-    DaemonCave = 0x05
-    FaerieRing = 0x07
-    Gazebo = 0x0A
-    Graveyard = 0x0C
-    ArcherHouse = 0x0D
-    DwarfCott = 0x0F
+    Zero = 0x00
+    N_Alchemylab = 0x01
+    N_Skeleton = 0x04
+    N_DaemonCave = 0x05
+    N_FaerieRing = 0x07
+    N_Gazebo = 0x0A
+    N_Graveyard = 0x0C
+    N_ArcherHouse = 0x0D
+    N_DwarfCott = 0x0F
 
-    PeasantHut = 0x10
-    DragonCity = 0x14
-    Lighthouse = 0x15
-    WaterWheel = 0x16
-    Mines = 0x17
-    Obelisk = 0x19
-    Oasis = 0x1A
+    N_PeasantHut = 0x10
+    N_DragonCity = 0x14
+    N_Lighthouse = 0x15
+    N_Waterwheel = 0x16
+    N_Mines = 0x17
+    N_Obelisk = 0x19
+    N_Oasis = 0x1A
     Coast = 0x1C
-    Sawmill = 0x1D
-    Oracle = 0x1E
+    N_Sawmill = 0x1D
+    N_Oracle = 0x1E
 
-    Shipwreck = 0x20
-    DesertTent = 0x22
-    Castle = 0x23
-    StoneLights = 0x24
-    WagonCamp = 0x25
-    Windmill = 0x28
+    N_Shipwreck = 0x20
+    N_DesertTent = 0x22
+    N_Castle = 0x23
+    N_StoneLights = 0x24
+    N_WagonCamp = 0x25
+    N_Windmill = 0x28
 
-    RandomTown = 0x30
-    RandomCastle = 0x31
+    N_RandomTown = 0x30
+    N_RandomCastle = 0x31
     Shrub2 = 0x38
     NothingSpecial = 0x39
-    WatchTower = 0x3A
-    TreeHouse = 0x3B
-    TreeCity = 0x3C
-    Ruins = 0x3D
-    Fort = 0x3E
-    TradingPost = 0x3F
+    N_WatchTower = 0x3A
+    N_TreeHouse = 0x3B
+    N_TreeCity = 0x3C
+    N_Ruins = 0x3D
+    N_Fort = 0x3E
+    N_Tradingpost = 0x3F
 
-    AbandonedMine = 0x40
-    TreeKnowledge = 0x44
-    DoctorHut = 0x45
-    Temple = 0x46
-    HillFort = 0x47
-    HalflingHole = 0x48
-    MercenaryCamp = 0x49
-    Pyramid = 0x4C
-    Citydead = 0x4D
-    Excavation = 0x4E
-    Sphinx = 0x4F
+    N_Abandonedmine = 0x40
+    N_Treeknowledge = 0x44
+    N_DoctorHut = 0x45
+    N_Temple = 0x46
+    N_Hillfort = 0x47
+    N_HalflingHole = 0x48
+    N_MercenaryCamp = 0x49
+    N_Pyramid = 0x4C
+    N_CityDead = 0x4D
+    N_Excavation = 0x4E
+    N_Sphinx = 0x4F
 
     TarPit = 0x51
-    ArtesianSpring = 0x52
-    TrollBridge = 0x53
-    WateringHole = 0x54
-    WitchShut = 0x55
-    Xanadu = 0x56
-    Cave = 0x57
-    MagellanMaps = 0x59
-    DerelictShip = 0x5B
-    MagicWell = 0x5E
+    N_ArtesianSpring = 0x52
+    N_Trollbridge = 0x53
+    N_WateringHole = 0x54
+    N_WitchHut = 0x55
+    N_Xanadu = 0x56
+    N_Cave = 0x57
+    N_MagellanMaps = 0x59
+    N_DerelictShip = 0x5B
+    N_MagicWell = 0x5E
 
-    ObservationTower = 0x60
-    FreemanFoundry = 0x61
+    N_ObservationTower = 0x60
+    N_FreemanFoundry = 0x61
     Trees = 0x63
     Mounts = 0x64
     Volcano = 0x65
@@ -300,18 +300,18 @@ type ObjectType enum(uint8) {
 
     LavaPool = 0x70
     Shrub = 0x71
-    Arena = 0x72
-    BarrowMounds = 0x73
-    Mermaid = 0x74
-    Sirens = 0x75
-    HutMagi = 0x76
-    EyeMagi = 0x77
-    TravellerTent = 0x78
-    Jail = 0x7B
-    FireAltar = 0x7C
-    AirAltar = 0x7D
-    EarthAltar = 0x7E
-    WaterAltar = 0x7F
+    N_Arena = 0x72
+    N_BarrowMounds = 0x73
+    N_Mermaid = 0x74
+    N_Sirens = 0x75
+    N_HutMagi = 0x76
+    N_EyeMagi = 0x77
+    N_TravellerTent = 0x78
+    N_Jail = 0x7B
+    N_FireAltar = 0x7C
+    N_AirAltar = 0x7D
+    N_EarthAltar = 0x7E
+    N_WaterAltar = 0x7F
 
     WaterChest = 0x80
     AlchemyLab = 0x81
@@ -330,7 +330,7 @@ type ObjectType enum(uint8) {
     GoblinHut = 0x8E
     DwarfCott = 0x8F
 
-    PeasantHut = 0x90
+    Peasanthut = 0x90
     Event = 0x93
     DragonCity = 0x94
     Lighthouse = 0x95
@@ -347,9 +347,9 @@ type ObjectType enum(uint8) {
     Shipwreck = 0xA0
     DesertTent = 0xA2
     Castle = 0xA3
-    StoneLights = 0xA4
-    Wagoncamp = 0xA5
-    Whirlpool = 0xA7
+    Stonelights = 0xA4
+    WagonCamp = 0xA5
+    WhirlPool = 0xA7
     Windmill = 0xA8
     Artifact = 0xA9
     Boat = 0xAB
@@ -370,13 +370,13 @@ type ObjectType enum(uint8) {
     TreeCity = 0xBC
     Ruins = 0xBD
     Fort = 0xBE
-    TradingPost = 0xBF
+    Tradingpost = 0xBF
 
-    AbandonedMine = 0xC0
-    ThatchedHut = 0xC1
-    StandingStones = 0xC2
+    Abandonedmine = 0xC0
+    Thatchedhut = 0xC1
+    Standingstones = 0xC2
     Idol = 0xC3
-    TreeKnowledge = 0xC4
+    TreeOfKnowledge = 0xC4
     Doctorhut = 0xC5
     Temple = 0xC6
     HillFort = 0xC7
@@ -385,7 +385,7 @@ type ObjectType enum(uint8) {
     Shrine2 = 0xCA
     Shrine3 = 0xCB
     Pyramid = 0xCC
-    Citydead = 0xCD
+    CityDead = 0xCD
     Excavation = 0xCE
     Sphinx = 0xCF
 
@@ -408,12 +408,12 @@ type ObjectType enum(uint8) {
     ObservationTower = 0xE0
     FreemanFoundry = 0xE1
     Reefs = 0xE9
-    AlchemyTower = 0xEA
-    Stables = 0xEB
+    N_AlchemyTower = 0xEA
+    N_Stables = 0xEB
     Mermaid = 0xEC
     Sirens = 0xED
-    Hutmagi = 0xEE
-    Eyemagi = 0xEF
+    HutMagi = 0xEE
+    EyeMagi = 0xEF
 
     AlchemyTower = 0xF0
     Stables = 0xF1
